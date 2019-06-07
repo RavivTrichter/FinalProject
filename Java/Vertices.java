@@ -3,6 +3,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
+
 
 public class Vertices {
 
@@ -47,12 +49,17 @@ public class Vertices {
 
     }
 
-    public ArrayList<Vertex> createSubGraph( int size, int ModuloEqual) {
+
+    public ArrayList<Vertex> createRandomSubGraph( int size ) {
+
         ArrayList<Vertex> res = new ArrayList<Vertex>();
-        res.add(Vertices.get(0)); // where the restaurant is located.
-        for (int i = 1; res.size() < size; i++) {
-            if(i % 2 == ModuloEqual)
-                res.add(Vertices.get(i));
+        Random rand = new Random();
+        res.add(Vertices.get(0)); // always adding the restaurant
+        int j;
+        for (int i = 0; i < size; i++) {
+            j = rand.nextInt(Vertices.size()-1) + 1; // in range [1,129] so the restaurant will always be there
+            res.add(Vertices.get(j));
+            Vertices.remove(j);
         }
         return res;
     }

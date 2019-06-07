@@ -8,7 +8,7 @@ public class Graph {
 
 
     public Graph(ArrayList<Vertex> Vertices){
-        this.Vertices = new ArrayList<Vertex>(Vertices);
+        this.Vertices = new ArrayList<Vertex>(Vertices); // copy c'tor
         graph = new double[Vertices.size()][Vertices.size()];
         initGraph();
     }
@@ -16,7 +16,6 @@ public class Graph {
     public ArrayList<Vertex> getVertices() {
         return Vertices;
     }
-
 
 
     public double[][] getGraph() {
@@ -38,7 +37,6 @@ public class Graph {
             }
         }
     }
-
 
     public void printGraph(){
         for (int i = 0; i < Vertices.size(); i++) {

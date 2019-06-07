@@ -6,13 +6,16 @@ import ilog.cplex.IloCplex;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Based on code by Hernan Caceres <github/zonbeka>
  *
  * Solving a TSP by Miller-Tucker-Zemlin formulation
  *
- * @authors Raviv Trichter & Alon Zemer
+ * @authors Alon Zemer & Raviv Trichter
+ *
+ * Tel-Hai College
  */
 
 public class TSP {
@@ -23,46 +26,25 @@ public class TSP {
     private IloNumVar[][] x;
     private IloNumVar[] u;
     private IloLinearNumExpr obj;
-    private String filename;
     private double FirstEdge;
     private double ObjectiveValue;
     private ArrayList<Integer> Route;
+    private int firstIdx;
+    private String status;
 
-    private int idx;
 
-
-    public TSP(double[][] G, int dimension, String filename){ // for given Graph
+    public TSP(double[][] G, int dimension){ // for given Graph
         Graph = G;
         N = dimension;
         Route = new ArrayList<Integer>();
-        this.filename = filename;
     }
 
-    public TSP(int n){ // for random Graph
-        N = n;
-        Route = new ArrayList<Integer>();
-        initRandomGraph();
+
+
+    public ArrayList<Integer> getRoute() {
+        return Route;
     }
 
-    private void initRandomGraph(){
-        double[] coorX = new double[N + 1];
-        double[] coorY = new double[N + 1];
-
-        Random rnd = new Random();
-
-        for (int i = 1; i <= N; i++) {
-            coorX[i] = 100 * rnd.nextDouble();
-            coorY[i] = 100 * rnd.nextDouble();
-        }
-
-        Graph = new double[N + 1][N + 1];
-
-        for (int i = 1; i <= N; i++) {
-            for (int j = 1; j <= N; j++) {
-                Graph[i][j] = Math.hypot(coorX[i] - coorX[j], coorY[i] - coorY[j]);
-            }
-        }
-    }
 
     public double getFirstEdge() {
         return FirstEdge;
@@ -72,8 +54,8 @@ public class TSP {
         return ObjectiveValue;
     }
 
-    public int getIdx() {
-        return idx;
+    public int getFirstIdx() {
+        return firstIdx;
     }
 
     private void initObjectiveFunction(){   //2
@@ -81,16 +63,16 @@ public class TSP {
 
             obj = cplex.linearNumExpr();
 
-            for (int i = 1; i <= N; i++)
-                for (int j = 1; j <= N; j++)
+            for (int i = 0; i < N; i++)
+                for (int j = 0; j < N; j++)
                     if (i != j)
-                        obj.addTerm(Graph[i-1][j-1], x[i][j]); //multiplying (from model cij*xij)
+                        obj.addTerm(Graph[i][j], x[i][j]); //multiplying (from model cij*xij)
             cplex.addMinimize(obj);
 
         } catch (IloException e) {
-            System.out.println("In initObjectiveFunction()\nAborting Program");
+            System.err.println("In initObjectiveFunction()\nAborting Program");
             e.printStackTrace();
-            System.exit(0);
+            System.exit(1);
         }
 
     }
@@ -99,11 +81,11 @@ public class TSP {
         try {
 
             cplex = new IloCplex();
-            x = new IloNumVar[N + 1][N + 1];
+            x = new IloNumVar[N][N];
 
             /* Telling the model we are going to be using boolean variables */
-            for (int i = 1; i <= N; i++)
-                for (int j = 1; j <= N; j++)
+            for (int i = 0; i < N; i++)
+                for (int j = 0; j < N; j++)
                     if (i != j)
                         x[i][j] = cplex.boolVar("x." + i + "." + j);
             /*
@@ -113,8 +95,8 @@ public class TSP {
              * part of the model -> this part assures us that there is a real path
              *
              * */
-            u = new IloNumVar[N + 1];
-            for (int i = 2; i <= N; i++)
+            u = new IloNumVar[N];
+            for (int i = 1; i < N; i++)
                 u[i] = cplex.numVar(0, Double.MAX_VALUE, "u." + i);
 
 
@@ -129,9 +111,9 @@ public class TSP {
 
             /* For each j :  xij = 1 and i != j      ==>    (For every column)    */
 
-            for (int j = 1; j <= N; j++) {
+            for (int j = 0; j < N; j++) {
                 IloLinearNumExpr expr = cplex.linearNumExpr();
-                for (int i = 1; i <= N; i++) {
+                for (int i = 0; i < N; i++) {
                     if (i != j)
                         expr.addTerm(1, x[i][j]);
                 }
@@ -140,9 +122,9 @@ public class TSP {
 
             /* For each i :  xij = 1 and i != j      ==>     (For every row)      */
 
-            for (int i = 1; i <= N; i++) {
+            for (int i = 0; i < N; i++) {
                 IloLinearNumExpr expr = cplex.linearNumExpr();
-                for (int j = 1; j <= N; j++) {
+                for (int j = 0; j < N; j++) {
                     if (j != i)
                         expr.addTerm(1, x[i][j]);
                 }
@@ -151,8 +133,8 @@ public class TSP {
 
             /*   ui - uj + (n-1)*xij <= n-2     ==>  for every i and j except i = j = 1    */
 
-            for (int i = 2; i <= N; i++) {
-                for (int j = 2; j <= N; j++) {
+            for (int i = 1; i < N; i++) {
+                for (int j = 1; j < N; j++) {
                     if (i!=j){
                         IloLinearNumExpr expr = cplex.linearNumExpr();
                         expr.addTerm(1, u[i]);
@@ -169,58 +151,71 @@ public class TSP {
         }
     }
 
-    public void printGraph(){
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++)
-                System.out.printf("%.2f\t",Graph[i][j]);
-            System.out.println();
-        }
-    }
-
     public boolean solve(){
         initVariables();
         initObjectiveFunction();
         addConstraints();
+
         try {
-            PrintWriter outFile = new PrintWriter(new FileWriter(filename, true));
             if(cplex.solve()) {
 
-                for (int i = 1; i < x.length; i++) {
-                    for (int j = 1; j < x[i].length; j++) {
-                        if(i != j && cplex.getValue(x[i][j]) == 1){
-                            Route.add(j);
-                            outFile.printf("%s ",String.format( "%6.2f",Graph[i-1][j-1]) );
-                            if (i == 1) {
-                                FirstEdge = Graph[i - 1][j - 1];
-                                idx = j;
+                for (int i = 0; i < x.length  ; i++) {
+
+                    for (int j = 0; j < x[i].length ; j++) {
+
+                        if(i != j && cplex.getValue(x[i][j]) > 0.5) { // part of the path
+                            if (i == 0) {
+                                FirstEdge = Graph[i][j];
+                                firstIdx = j;
                             }
+                            Route.add(j); // inserting the columns that are in the path in a certain order
                         }
-                        else
-                            outFile.printf("%s ",String.format("%6.2f",0.0));
+
                     }
-                    outFile.print("\n");
                 }
                 ObjectiveValue = cplex.getObjValue();
-                outFile.print("\n\n" + cplex.getStatus());
+                status = cplex.getStatus().toString();
+
+
+                int nextNode, prevNode=0;
+
+                ArrayList<Integer> RouteByIndices = new ArrayList<Integer>();
+
+                RouteByIndices.add(prevNode); // adding zero as first node by our definition
+                while(RouteByIndices.size() < N+1){
+                    nextNode = Route.get(prevNode);
+                    RouteByIndices.add(nextNode); // only add here
+                    prevNode = nextNode;
+                }
+                Route = RouteByIndices;
+
             }
             cplex.end();
-            outFile.close();
 
         }catch (IloException e){
             e.printStackTrace();
             return false;
-        } catch (IOException e){
-        e.printStackTrace();
-        return false;
-    }
+        }
         return true;
     }
 
-    public void printRoute(){
-        for (int i = 0; i < Route.size(); i++) {
-            System.out.print(i != Route.size()-1 ? Route.get(i) + " -> " : Route.get(i));
+
+
+
+    public void printRouteToFileByIndices(ArrayList<Vertex> Vertices, String filename, long timeInSeconds) {
+        try{
+            PrintWriter outFile = new PrintWriter(new FileWriter(filename, true));
+
+            for (int i = 0; i < Route.size(); i++) {
+                outFile.print(Vertices.get( Route.get(i) ).getIndex() ); // printing the index of every vertex ('hachula130.dat')
+                outFile.print(" ");
+            }
+            outFile.print("\nObjective Value : " + ObjectiveValue + "\nSeconds : " + TimeUnit.MILLISECONDS.toSeconds(timeInSeconds) + "\nStatus : " + status);
+            outFile.close();
         }
-        System.out.println();
+        catch(IOException e){
+            e.printStackTrace();
+        }
     }
 
 

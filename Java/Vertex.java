@@ -18,6 +18,12 @@ public class Vertex {
 
     }
 
+    @Override
+    public String toString() {
+        return "Vertex=" + this.index +" ";
+    }
+
+
     public int getIndex() { return index; }
     public double getX() {
         return x;
