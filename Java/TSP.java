@@ -202,7 +202,7 @@ public class TSP {
 
 
 
-    public void printRouteToFileByIndices(ArrayList<Vertex> Vertices, String filename, long timeInSeconds) {
+    public void printRouteToFileByIndices(ArrayList<Node> Vertices, String filename, long timeInSeconds) {
         try{
             PrintWriter outFile = new PrintWriter(new FileWriter(filename, true));
 

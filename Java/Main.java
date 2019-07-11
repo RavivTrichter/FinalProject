@@ -1,21 +1,19 @@
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
-public class MainForKCities {
+public class Main {
 
 
     public static void main(String[] args) {
 
         try {
-
-            int sizeOfFirstRoute = 10,  pointsToAdd = 5; // args[0] = m ; args[1] = k;
-            int cityK = 4;
+            int m = Integer.parseInt(args[0]),  k = Integer.parseInt(args[1]) ,i_ = Integer.parseInt(args[2]);
 
             long start, finish, timeElapsed;
-            String fileG1 = "/home/raviv/PycharmProjects/Project/GUI/G1Route.dat", // file for the first Graph
-                    fileG2 = "/home/raviv/PycharmProjects/Project/GUI/G2Route.dat", // file for second Graph
-                    fileG3 = "/home/raviv/PycharmProjects/Project/GUI/G3Route.dat",  // file for third Graph
-                    dataFile = "/home/raviv/PycharmProjects/Project/GUI/Data.dat";
+            String fileG1 = "G1Route.dat", // file for the first Graph
+                    fileG2 = "G2Route.dat", // file for second Graph
+                    fileG3 = "G3Route.dat",  // file for third Graph
+                    dataFile = "Data.dat";
 
 
 
@@ -32,13 +30,17 @@ public class MainForKCities {
             writer.print("");
             writer.close();
 
+            writer = new PrintWriter(dataFile);
+            writer.print("");
+            writer.close();
+
 
 
             Vertices vertices = new Vertices("src/hachula130.dat"); // parsing the Vertices (Euclidean Distance)
 
 
             System.out.println("\n\n\n\nCalculating first TSP\n");
-            ArrayList<Vertex> G1Vertices = vertices.createRandomSubGraph(sizeOfFirstRoute - 1); // because we always add the first node
+            ArrayList<Node> G1Vertices = vertices.createRandomSubGraph(m - 1); // because we always add the first node
             Graph G1 = new Graph(G1Vertices); // create the sub-graph ==> the deliveryman's first route
             TSP tspG1 = new TSP(G1.getGraph(), G1.getVertices().size());
             start = System.currentTimeMillis();
@@ -49,7 +51,7 @@ public class MainForKCities {
 
             System.out.println("\n\n\n\nCalculating second TSP\n");
 
-            ArrayList<Vertex> G2Vertices = vertices.createRandomSubGraph(pointsToAdd-1);
+            ArrayList<Node> G2Vertices = vertices.createRandomSubGraph(k-1);
             Graph G2 = new Graph(G2Vertices);
             TSP tspG2 = new TSP(G2.getGraph(),G2.getVertices().size());
             start = System.currentTimeMillis();
@@ -62,28 +64,28 @@ public class MainForKCities {
 
             //G1Vertices.remove(tspG1.getFirstIdx() ); // removing the first point the deliveryman visited --> exactly the jth column in the
             // graph as we built the graph by the order of the vertices in G1Vertices
-            double weightOfEdges = 0;
+            double weightOfEdgesVisited = 0;
 
-            for (int i = 1; i <= cityK; i++) {
+            for (int i = 1; i <= i_; i++) {
                 int fromIndexInRoute = tspG1.getRoute().get((i-1));
-                Vertex vertexFrom = G1Vertices.get(fromIndexInRoute);
+                Node From = G1Vertices.get(fromIndexInRoute);
                 int toIndexInRoute = tspG1.getRoute().get(i);
-                Vertex vertexTo = G1Vertices.get(toIndexInRoute);
-                weightOfEdges += G1.distance(vertexFrom, vertexTo);
+                Node To = G1Vertices.get(toIndexInRoute);
+                weightOfEdgesVisited += G1.distance(From, To);
             }
 
 
-            double FirstOption = tspG1.getObjectiveValue() + tspG2.getObjectiveValue() - weightOfEdges;
+            double FirstOption = tspG1.getObjectiveValue() + tspG2.getObjectiveValue() - weightOfEdgesVisited;
 
-            int fromIndexInRoute = tspG1.getRoute().get((cityK));
-            Vertex vertexFrom = G1Vertices.get(fromIndexInRoute);
+            int fromIndexInRoute = tspG1.getRoute().get((i_));
+            Node vertexFrom = G1Vertices.get(fromIndexInRoute);
             int toIndexInRoute = tspG1.getRoute().get(0);
-            Vertex vertexTo = G1Vertices.get(toIndexInRoute);
+            Node vertexTo = G1Vertices.get(toIndexInRoute);
             double weightReturnHome = G1.distance(vertexFrom, vertexTo);
 
-            ArrayList<Vertex> removeVertices = new ArrayList<Vertex>(); // contains k vertices from the start that we
+            ArrayList<Node> removeVertices = new ArrayList<Node>(); // contains k vertices from the start that we
             // are going to remove
-            for (int i = 1; i <= cityK; i++)
+            for (int i = 1; i <= i_; i++)
                 removeVertices.add(G1Vertices.get(tspG1.getRoute().get(i)));
 
 
@@ -121,7 +123,7 @@ public class MainForKCities {
             writer = new PrintWriter(dataFile);
             writer.print("First Option : " + FirstOption);
             writer.print("\nSecond Option : " + SecondOption );
-            writer.print("\nEdges That Were Visited : " + weightOfEdges);
+            writer.print("\nEdges That Were Visited : " + weightOfEdgesVisited);
             writer.print("\nEdge For Returning Home : " + weightReturnHome + "\n");
             writer.close();
 

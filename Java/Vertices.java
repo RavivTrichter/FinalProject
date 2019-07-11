@@ -8,15 +8,15 @@ import java.util.Random;
 
 public class Vertices {
 
-    private ArrayList<Vertex> Vertices;
+    private ArrayList<Node> Vertices;
 
     public Vertices(String filename){
-        Vertices = new ArrayList<Vertex>();
+        Vertices = new ArrayList<Node>();
         initVertices(filename);
     }
 
 
-    public ArrayList<Vertex> getVertices() {
+    public ArrayList<Node> getVertices() {
         return Vertices;
     }
 
@@ -30,7 +30,7 @@ public class Vertices {
                 String line = "";
                 while((line = reader.readLine()) != null ){
                     String[] coordinates = line.split(" ");
-                    Vertices.add(new Vertex(Double.parseDouble(coordinates[1]), Double.parseDouble(coordinates[2]),sz++));
+                    Vertices.add(new Node(Double.parseDouble(coordinates[1]), Double.parseDouble(coordinates[2]),sz++));
                 }
             } catch(IOException e){
                 e.printStackTrace();
@@ -50,12 +50,13 @@ public class Vertices {
     }
 
 
-    public ArrayList<Vertex> createRandomSubGraph( int size ) {
+    public ArrayList<Node> createRandomSubGraph( int size ) {
 
-        ArrayList<Vertex> res = new ArrayList<Vertex>();
+        ArrayList<Node> res = new ArrayList<Node>();
         Random rand = new Random();
         res.add(Vertices.get(0)); // always adding the restaurant
         int j;
+
         for (int i = 0; i < size; i++) {
             j = rand.nextInt(Vertices.size()-1) + 1; // in range [1,129] so the restaurant will always be there
             res.add(Vertices.get(j));

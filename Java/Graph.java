@@ -4,16 +4,16 @@ public class Graph {
 
     private double[][] graph;
 
-    private ArrayList<Vertex> Vertices;
+    private ArrayList<Node> Vertices;
 
 
-    public Graph(ArrayList<Vertex> Vertices){
-        this.Vertices = new ArrayList<Vertex>(Vertices); // copy c'tor
+    public Graph(ArrayList<Node> Vertices){
+        this.Vertices = new ArrayList<Node>(Vertices); // copy c'tor
         graph = new double[Vertices.size()][Vertices.size()];
         initGraph();
     }
 
-    public ArrayList<Vertex> getVertices() {
+    public ArrayList<Node> getVertices() {
         return Vertices;
     }
 
@@ -23,7 +23,7 @@ public class Graph {
     }
 
 
-    public double distance(Vertex v1, Vertex v2){
+    public double distance(Node v1, Node v2){
         double deltaX = v1.getX() - v2.getX();
         double deltaY = v1.getY() - v2.getY();
         return Math.sqrt( deltaX * deltaX  +  deltaY * deltaY );
