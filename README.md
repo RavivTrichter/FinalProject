@@ -20,16 +20,26 @@ Explaintion about the code :
   TSP - A class implemented using CPLEX API. Receiving a graph represented as a matrix and it's dimension, and calculating a TSP route. We assume that the first row in the matrix is always the restaraunt so the route will start and end there. This TSP is solved by Integer Programming using the Miller-Tucker-Zemlin form. The TSP route saves the route and more information in the class.
 
 
+
+
 In the Main file - Main.java :
   Parses the data from 'hachula.dat' such that each row is a point and each point is a node in the graph.
+  
   The main file receives 3 arguments in args variable : m , k and i in this order.
   Calculates 3 TSP routes of 3 different graphs : 
+  
     - The first graph of m nodes.
+    
     - The second graph of k nodes.
+    
     - The third graph of m - i + k nodes (not including the nodes that where already visited in the firsr route).
+    
   The main calculates two variables : firstOption, secondOption while :
+  
     firstOption = TSP(m) + TSP(k) - edges_that_already_visited
+    
     secondOption = TSP(m-i+k) + weight_of_edge_to_return_home
+    
   
   
   
