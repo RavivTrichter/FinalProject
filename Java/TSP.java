@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
  *
  * Solving a TSP by Miller-Tucker-Zemlin formulation
  *
- * @authors Alon Zemer & Raviv Trichter
+ * @authors Raviv Trichter @ Alon Zemer
  *
  * Tel-Hai College
  */
