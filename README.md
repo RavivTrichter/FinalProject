@@ -26,7 +26,7 @@ In the Main file - Main.java :
   Parses the data from 'hachula.dat' such that each row is a point and each point is a node in the graph.
   
   The main file receives 3 arguments in args variable : m , k and i in this order.
-  Calculates 3 TSP routes of 3 different graphs : 
+  Calculates 3 TSP routes of 3 different graphs: 
   
     - The first graph of m nodes.
     
@@ -35,7 +35,9 @@ In the Main file - Main.java :
     - The third graph of m - i + k nodes (not including the nodes that where already visited in the firsr route).
     
   The main calculates two variables : firstOption, secondOption while :
-  
+    
+    (TSP(x) - receives a graph with x nodes and solves it using CPLEX)
+    
     firstOption = TSP(m) + TSP(k) - edges_that_already_visited
     
     secondOption = TSP(m-i+k) + weight_of_edge_to_return_home
@@ -54,4 +56,6 @@ In the Main file - Main.java :
   
   *** To run the code you will need to download and install the CPLEX package. here is a great explanation :
   https://www.youtube.com/watch?v=51CcmaISSX0&t=166s
+  
+  authors : Raviv Trichter and Alon Zemer.
  
